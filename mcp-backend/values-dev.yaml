@@ -1,0 +1,117 @@
+# Namespace where resources are created
+namespace: aiassistant-mcp-dev
+
+replicaCount: 1
+
+image:
+  # Use your real image here (shared across services or a multi-mode image)
+  repository: sapydi/addonn-mcp-servers
+  tag: latest
+  pullPolicy: IfNotPresent
+
+services:
+  planon:
+    enabled: true
+    name: planon-service
+    port: 8051
+    path: /planon/mcp
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1024Mi"
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpu: 80
+      memory: 75
+
+  dynamics:
+    enabled: true
+    name: dynamics-service
+    port: 8052
+    path: /dynamics/mcp
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1024Mi"
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpu: 80
+      memory: 75
+
+  dispatcher:
+    enabled: true
+    name: dispatcher-service
+    port: 8053
+    path: /dispatcher/mcp
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "750m"
+        memory: "1024Mi"
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpu: 80
+      memory: 75
+
+  package:
+    enabled: true
+    name: package-service
+    port: 8054
+    path: /package/mcp
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1024Mi"
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpu: 80
+      memory: 75
+
+
+# Ingress (for ingress-nginx)
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Force HTTPS redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: "api.add-onn.com"   # leave empty (use ELB DNS) - later replace with your domain
+      paths:
+        - path: /package(/|$)(.*)
+          service: planon-service
+          port: 8051
+        - path: /dynamics(/|$)(.*)
+          service: dynamics-service
+          port: 8052
+        - path: /dispatcher(/|$)(.*)
+          service: dispatcher-service
+          port: 8053
+        - path: /package(/|$)(.*)
+          service: package-service
+          port: 8054
+  tls:
+    - secretName: api-add-onn-com-tls  # Changed: Added TLS configuration
+      hosts:
+        - api.add-onn.com  

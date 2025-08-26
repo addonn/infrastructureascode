@@ -1,1 +1,11 @@
-#test
+*.crt
+*.key
+*.csr
+*.bat
+*.log
+terraform/.terraform
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup  
+terraform/plan
+rendered.yaml
+.DS_Store   

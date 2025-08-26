@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aiassistant-ui.fullname" . }}
+spec:
+  selector:
+    app: {{ include "aiassistant-ui.fullname" . }}
+  ports:
+    - port: 80
+      targetPort: {{ .Values.port }}
+      protocol: TCP
