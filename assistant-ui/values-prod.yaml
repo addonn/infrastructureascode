@@ -1,4 +1,4 @@
-namespace: aiassistant-ui-dev
+namespace: aiassistant-ui-prod
 replicaCount: 1
 image: sapydi/aiassistant-web:20250827111500-382763a
 port: 80
@@ -18,7 +18,7 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: "dev.aissistant.add-onn.com"  # Main domain for UI
+    - host: "aissistant.add-onn.com"  # Main domain for UI
       paths:
         - path: /
           pathType: Prefix

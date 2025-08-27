@@ -3,6 +3,9 @@
 # Use the batch file to create the certificate for the add-onn.com
 
 kubectl create namespace aiassistant-ui-dev
+kubectl create namespace aiassistant-ui-test
+kubectl create namespace aiassistant-ui-prod
+
 kubectl create namespace aiassistant-mcp-dev
 
 # install the ingress controller.
@@ -15,7 +18,11 @@ kubectl get svc ingress-nginx-controller -n ingress-nginx
 
 
 helm install aiassistant-ui ./assistant-ui -f assistant-ui/values-dev.yaml --namespace aiassistant-ui-dev
+helm install aiassistant-ui ./assistant-ui -f assistant-ui/values-test.yaml --namespace aiassistant-ui-test
+helm install aiassistant-ui ./assistant-ui -f assistant-ui/values-prod.yaml --namespace aiassistant-ui-prod
+
 helm install aiassistant-mcp ./mcp-backend -f mcp-backend/values-dev.yaml --namespace aiassistant-mcp-dev
+
 
 
 
@@ -28,4 +35,10 @@ kubectl create secret tls api-add-onn-com-tls --cert=add-onn.com.crt --key=add-o
 # to upgrade the exisiting containers
 helm upgrade aiassistant-ui ./assistant-ui -f assistant-ui/values-dev.yaml --namespace aiassistant-ui-dev
 helm upgrade aiassistant-mcp ./mcp-backend -f mcp-backend/values-dev.yaml --namespace aiassistant-mcp-dev
+
+ kubectl rollout restart deployment aiassistant-ui -n aiassistant-ui-dev 
+ kubectl rollout status deployment aiassistant-ui -n aiassistant-ui-dev 
+ 
 nslookup your-load-balancer-dns-name
+
+kubectl exec -it aiassistant-ui-749958898d-46gmz -n aiassistant-ui-dev -- cat /etc/nginx/conf.d/default.conf
