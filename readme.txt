@@ -42,3 +42,5 @@ helm upgrade aiassistant-mcp ./mcp-backend -f mcp-backend/values-dev.yaml --name
 nslookup your-load-balancer-dns-name
 
 kubectl exec -it aiassistant-ui-749958898d-46gmz -n aiassistant-ui-dev -- cat /etc/nginx/conf.d/default.conf
+
+kubectl run tmp --rm -it --image=nginx -- bash

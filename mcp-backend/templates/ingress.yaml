@@ -1,35 +1,38 @@
-{{- range $name, $svc := .Values.services }}
-{{- if and $svc.enabled $svc.hpa.enabled }}
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: {{ $svc.name }}
-  namespace: {{ $.Values.namespace }}
-  labels:
-    app.kubernetes.io/name: {{ $svc.name }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {{ $svc.name }}
-  minReplicas: {{ $svc.hpa.minReplicas }}
-  maxReplicas: {{ $svc.hpa.maxReplicas }}
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: {{ $svc.hpa.cpu }}
-    {{- if $svc.hpa.memory }}
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: {{ $svc.hpa.memory }}
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
----
-{{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .service }}
+                port:
+                  number: {{ .port }}
+        {{- end }}
+  {{- end }}
 {{- end }}

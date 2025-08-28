@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   # Use your real image here (shared across services or a multi-mode image)
   repository: sapydi/addonn-mcp-servers
-  tag: latest
+  tag: 20250828055403-6c76d38
   pullPolicy: IfNotPresent
 
 services:
@@ -93,25 +93,29 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # Force HTTPS redirect
+    nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
-    - host: "api.add-onn.com"   # leave empty (use ELB DNS) - later replace with your domain
+    - host: "api.add-onn.com"
       paths:
-        - path: /package(/|$)(.*)
+        - path: /planon(/|$)(.*)
+          pathType: ImplementationSpecific
           service: planon-service
           port: 8051
         - path: /dynamics(/|$)(.*)
+          pathType: ImplementationSpecific
           service: dynamics-service
           port: 8052
         - path: /dispatcher(/|$)(.*)
+          pathType: ImplementationSpecific
           service: dispatcher-service
           port: 8053
         - path: /package(/|$)(.*)
+          pathType: ImplementationSpecific
           service: package-service
           port: 8054
   tls:
-    - secretName: api-add-onn-com-tls  # Changed: Added TLS configuration
+    - secretName: api-add-onn-com-tls
       hosts:
-        - api.add-onn.com  
+        - api.add-onn.com
