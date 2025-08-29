@@ -44,3 +44,20 @@ nslookup your-load-balancer-dns-name
 kubectl exec -it aiassistant-ui-749958898d-46gmz -n aiassistant-ui-dev -- cat /etc/nginx/conf.d/default.conf
 
 kubectl run tmp --rm -it --image=nginx -- bash
+
+
+# Check if Container Insights is enabled
+aws eks describe-cluster --name assistant-cluster --query 'cluster.logging'
+
+
+# setup for the logging
+helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install loki grafana/loki-stack --set grafana.enabled=false --set promtail.enabled=false --namespace logging --create-namespace
+helm upgrade --install promtail grafana/promtail --namespace logging
+
+helm upgrade --install grafana grafana/grafana --set adminPassword=admin123 --namespace logging
+
+kubectl port-forward svc/grafana 3000:80 -n logging
+ kubectl get secret loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+
+helm upgrade --install grafana grafana/grafana --namespace logging -f grafana-values.yaml

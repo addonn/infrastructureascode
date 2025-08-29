@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: logging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: grafana.add-onn.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 80
+  tls:                        # (optional, recommended if you have cert-manager/Let's Encrypt)
+    - hosts:
+        - grafana.add-onn.com
+      secretName: grafana-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loki-ingress
+  namespace: logging
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: loki.add-onn.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix       # changed from ImplementationSpecific for consistency
+            backend:
+              service:
+                name: loki
+                port:
+                  number: 3100
+  tls:                        # (optional, recommended if you have cert-manager/Let's Encrypt)
+    - hosts:
+        - loki.add-onn.com
+      secretName: loki-tls
